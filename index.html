@@ -18,9 +18,11 @@
             color: white;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
+            padding: 20px;
+            /* Thêm padding cho body để không bị dính vào các cạnh của màn hình */
         }
 
         header {
@@ -28,15 +30,14 @@
             text-align: center;
             padding: 20px;
             background-color: #6200ea;
-            /* Màu nền tươi sáng hơn */
+            /* Màu tím sáng */
             font-size: 24px;
             font-weight: bold;
             color: white;
-            /* Màu chữ trắng cho độ tương phản cao */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            /* Thêm bóng đổ nhẹ */
-            border-bottom: 3px solid #4e3abc;
-            /* Thêm đường viền màu tối hơn ở dưới */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            /* Thêm bóng đổ cho header */
+            margin-bottom: 50px;
+            /* Thêm khoảng cách phía dưới header */
         }
 
         #login-container {
@@ -44,30 +45,35 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
+            /* Thêm khoảng cách giữa các nút */
         }
 
         button {
             background-color: #4285f4;
             color: white;
-            padding: 12px 20px;
+            padding: 15px 25px;
+            /* Điều chỉnh padding để nút to hơn */
             border: none;
             border-radius: 8px;
             font-size: 18px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: background-color 0.3s;
         }
 
         button:hover {
             background-color: #357ae8;
+            /* Màu khi hover */
         }
 
         .github-btn {
             background-color: #24292e;
+            /* Màu nền cho nút GitHub */
         }
 
         .github-btn:hover {
             background-color: #1a1e22;
+            /* Màu khi hover nút GitHub */
         }
 
         #video-call {
