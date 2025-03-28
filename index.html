@@ -16,11 +16,11 @@
         body {
             background-color: #181818;
             color: white;
-            height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
         }
 
         header {
@@ -38,7 +38,6 @@
             justify-content: center;
             align-items: center;
             gap: 15px;
-            height: 60vh;
         }
 
         button {
@@ -70,16 +69,14 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            height: 100vh;
-            position: relative;
         }
 
         #video-frame {
-            width: 80%;
-            height: 70%;
+            width: 90%;
+            height: 60vh;
+            /* Adjusted for better mobile viewing */
             background: black;
             border-radius: 10px;
-            overflow: hidden;
             box-shadow: 0px 4px 15px rgba(255, 255, 255, 0.2);
         }
 
@@ -127,17 +124,27 @@
             font-size: 16px;
             padding: 5px 0;
         }
+
+        @media (max-width: 600px) {
+            #video-frame {
+                width: 100%;
+                /* Full width for smaller devices */
+            }
+
+            #controls,
+            #user-list {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 
 <body>
     <header>Video Call App</header>
-
     <div id="login-container">
         <button id="google-login-btn">Sign in with Google</button>
         <button id="github-login-btn" class="github-btn">Sign in with GitHub</button>
     </div>
-
     <div id="video-call">
         <div id="user-list">
             <h3>Participants</h3>
@@ -148,7 +155,6 @@
             <button id="exit-btn" class="control-btn">Exit</button>
         </div>
     </div>
-
     <script src="https://unpkg.com/@daily-co/daily-js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
@@ -160,8 +166,6 @@
             GoogleAuthProvider,
             GithubAuthProvider,
         } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
-
-        // ✅ Cấu hình Firebase mới
         const firebaseConfig = {
             apiKey: "AIzaSyBsCvXS1X7Meh_W_hVwkK3jJ8iXCpBJ2TU",
             authDomain: "nhom7sangthu6-ffef4.firebaseapp.com",
@@ -170,16 +174,12 @@
             messagingSenderId: "457634233649",
             appId: "1:457634233649:web:0bf1c2637217911190c410"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
         const githubProvider = new GithubAuthProvider();
-
         githubProvider.addScope("read:user");
-
         const ROOM_URL = "https://chunchunchun.daily.co/icbIpwVdShf6NWuhCgcK";
-
         const loginContainer = document.getElementById("login-container");
         const videoCallContainer = document.getElementById("video-call");
         const googleLoginButton = document.getElementById("google-login-btn");
@@ -187,11 +187,8 @@
         const exitButton = document.getElementById("exit-btn");
         const userList = document.getElementById("users");
         const videoFrame = document.getElementById("video-frame");
-
         let callFrame;
         let users = [];
-
-        // ✅ Fallback nếu redirect login quay về
         getRedirectResult(auth)
             .then((result) => {
                 if (result && result.user) {
@@ -201,7 +198,6 @@
             .catch((error) => {
                 console.error("Redirect login error:", error.message);
             });
-
         googleLoginButton.addEventListener("click", async () => {
             try {
                 const result = await signInWithPopup(auth, googleProvider);
@@ -211,7 +207,6 @@
                 await signInWithRedirect(auth, googleProvider);
             }
         });
-
         githubLoginButton.addEventListener("click", async () => {
             try {
                 const result = await signInWithPopup(auth, githubProvider);
@@ -221,26 +216,21 @@
                 alert("GitHub Login Failed: " + error.message);
             }
         });
-
         function handleLoginSuccess(user) {
             const userName = user.displayName || "Guest";
             users.push(userName);
             updateUserList();
             loginContainer.style.display = "none";
             videoCallContainer.style.display = "flex";
-
             callFrame = window.DailyIframe.createFrame(videoFrame, {
                 showLeaveButton: false,
                 iframeStyle: { width: "100%", height: "100%", border: "none" },
             });
-
             callFrame.join({ url: ROOM_URL, userName });
         }
-
         function updateUserList() {
             userList.innerHTML = users.map((user) => `<li>${user}</li>`).join("");
         }
-
         exitButton.addEventListener("click", () => {
             if (callFrame) {
                 callFrame.destroy();
