@@ -22,6 +22,7 @@
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
+            /* Thêm padding cho body để không bị dính vào các cạnh của màn hình */
         }
 
         header {
@@ -29,11 +30,14 @@
             text-align: center;
             padding: 20px;
             background-color: #6200ea;
+            /* Màu tím sáng */
             font-size: 24px;
             font-weight: bold;
             color: white;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            /* Thêm bóng đổ cho header */
             margin-bottom: 50px;
+            /* Thêm khoảng cách phía dưới header */
         }
 
         #login-container {
@@ -42,12 +46,14 @@
             justify-content: center;
             align-items: center;
             gap: 20px;
+            /* Thêm khoảng cách giữa các nút */
         }
 
         button {
             background-color: #4285f4;
             color: white;
             padding: 15px 25px;
+            /* Điều chỉnh padding để nút to hơn */
             border: none;
             border-radius: 8px;
             font-size: 18px;
@@ -57,14 +63,17 @@
 
         button:hover {
             background-color: #357ae8;
+            /* Màu khi hover */
         }
 
         .github-btn {
             background-color: #24292e;
+            /* Màu nền cho nút GitHub */
         }
 
         .github-btn:hover {
             background-color: #1a1e22;
+            /* Màu khi hover nút GitHub */
         }
 
         #video-call {
@@ -78,6 +87,7 @@
         #video-frame {
             width: 90%;
             height: 60vh;
+            /* Adjusted for better mobile viewing */
             background: black;
             border-radius: 10px;
             box-shadow: 0px 4px 15px rgba(255, 255, 255, 0.2);
@@ -131,6 +141,7 @@
         @media (max-width: 600px) {
             #video-frame {
                 width: 100%;
+                /* Full width for smaller devices */
             }
 
             #controls,
@@ -167,13 +178,7 @@
             getRedirectResult,
             GoogleAuthProvider,
             GithubAuthProvider,
-            linkWithCredential,
-            signInWithCredential,
-            fetchSignInMethodsForEmail,
-            OAuthCredential,
-            AuthCredential,
         } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
-
         const firebaseConfig = {
             apiKey: "AIzaSyBsCvXS1X7Meh_W_hVwkK3jJ8iXCpBJ2TU",
             authDomain: "nhom7sangthu6-ffef4.firebaseapp.com",
@@ -182,39 +187,48 @@
             messagingSenderId: "457634233649",
             appId: "1:457634233649:web:0bf1c2637217911190c410"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
         const githubProvider = new GithubAuthProvider();
         githubProvider.addScope("read:user");
-
-        async function handleGitHubLogin() {
+        const ROOM_URL = "https://chunchunchun.daily.co/icbIpwVdShf6NWuhCgcK";
+        const loginContainer = document.getElementById("login-container");
+        const videoCallContainer = document.getElementById("video-call");
+        const googleLoginButton = document.getElementById("google-login-btn");
+        const githubLoginButton = document.getElementById("github-login-btn");
+        const exitButton = document.getElementById("exit-btn");
+        const userList = document.getElementById("users");
+        const videoFrame = document.getElementById("video-frame");
+        let callFrame;
+        let users = [];
+        getRedirectResult(auth)
+            .then((result) => {
+                if (result && result.user) {
+                    handleLoginSuccess(result.user);
+                }
+            })
+            .catch((error) => {
+                console.error("Redirect login error:", error.message);
+            });
+        googleLoginButton.addEventListener("click", async () => {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                handleLoginSuccess(result.user);
+            } catch (error) {
+                console.warn("Popup login failed, falling back to redirect:", error.message);
+                await signInWithRedirect(auth, googleProvider);
+            }
+        });
+        githubLoginButton.addEventListener("click", async () => {
             try {
                 const result = await signInWithPopup(auth, githubProvider);
                 handleLoginSuccess(result.user);
             } catch (error) {
-                if (error.code === 'auth/account-exists-with-different-credential') {
-                    const email = error.customData.email;
-                    const methods = await fetchSignInMethodsForEmail(auth, email);
-                    if (methods.length > 0) {
-                        const credential = GithubAuthProvider.credentialFromError(error);
-                        try {
-                            const linkedResult = await signInWithCredential(auth, credential);
-                            handleLoginSuccess(linkedResult.user);
-                        } catch (linkError) {
-                            console.error("Error linking GitHub account:", linkError.message);
-                        }
-                    }
-                } else {
-                    console.error("GitHub Login Error:", error.message);
-                    alert("GitHub Login Failed: " + error.message);
-                }
+                console.error("GitHub Login Error:", error.message, error.code);
+                alert("GitHub Login Failed: " + error.message);
             }
-        }
-
-        document.getElementById("github-login-btn").addEventListener("click", handleGitHubLogin);
-
+        });
         function handleLoginSuccess(user) {
             const userName = user.displayName || "Guest";
             users.push(userName);
@@ -227,12 +241,10 @@
             });
             callFrame.join({ url: ROOM_URL, userName });
         }
-
         function updateUserList() {
-            userList.innerHTML = users.map(user => `<li>${user}</li>`).join("");
+            userList.innerHTML = users.map((user) => `<li>${user}</li>`).join("");
         }
-
-        document.getElementById("exit-btn").addEventListener("click", () => {
+        exitButton.addEventListener("click", () => {
             if (callFrame) {
                 callFrame.destroy();
             }
